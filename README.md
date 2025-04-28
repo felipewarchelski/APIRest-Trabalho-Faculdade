@@ -22,6 +22,8 @@ Projeto de CRUD simples utilizando:
 ```bash
 pip install fastapi uvicorn sqlalchemy
 
+(Caso necessário pode forçar uma inicialização do servidor: uvicorn main:app --reload)
+
 1 - Execute o servidor FastAPI:
 2 - Abra o arquivo index.html no navegador.
 (Opcional: utilizar extensão "Live Server" no VS Code para abrir o HTML.)
