@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Usuários</title>
+</head>
+
+<body>
+    <h1>Cadastro de Usuários</h1>
+
+    <form id="usuario-form">
+        <input type="hidden" id="id"> <!-- Para armazenar o ID quando editar -->
+        <input type="text" id="nome" placeholder="Nome" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <button type="submit">Salvar</button>
+    </form>
+
+    <h2>Lista de Usuários</h2>
+    <ul id="usuarios-lista"></ul>
+
+    <script>
+        const apiUrl = 'http://localhost:8000/usuarios/';
+
+        document.getElementById('usuario-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('id').value;
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+
+            if (id) {
+                // Atualizar usuário (PUT)
+                const resposta = await fetch(apiUrl + id, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email })
+                });
+
+                if (resposta.ok) {
+                    alert('Usuário atualizado com sucesso!');
+                    listarUsuarios();
+                    limparFormulario();
+                } else {
+                    alert('Erro ao atualizar usuário.');
+                }
+            } else {
+                // Criar novo usuário (POST)
+                const resposta = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email })
+                });
+
+                if (resposta.ok) {
+                    alert('Usuário cadastrado com sucesso!');
+                    listarUsuarios();
+                    limparFormulario();
+                } else {
+                    alert('Erro ao cadastrar usuário.');
+                }
+            }
+        });
+
+        async function listarUsuarios() {
+            const resposta = await fetch(apiUrl);
+            const usuarios = await resposta.json();
+            const lista = document.getElementById('usuarios-lista');
+            lista.innerHTML = '';
+
+            usuarios.forEach(usuario => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    ${usuario.id} - ${usuario.nome} (${usuario.email}) 
+                    <button onclick="editarUsuario(${usuario.id}, '${usuario.nome}', '${usuario.email}')">Editar</button>
+                    <button onclick="deletarUsuario(${usuario.id})">Deletar</button>
+                `;
+                lista.appendChild(li);
+            });
+        }
+
+        function editarUsuario(id, nome, email) {
+            document.getElementById('id').value = id;
+            document.getElementById('nome').value = nome;
+            document.getElementById('email').value = email;
+        }
+
+        async function deletarUsuario(id) {
+            if (confirm('Tem certeza que deseja deletar este usuário?')) {
+                const resposta = await fetch(apiUrl + id, { method: 'DELETE' });
+
+                if (resposta.ok) {
+                    alert('Usuário deletado!');
+                    listarUsuarios();
+                } else {
+                    alert('Erro ao deletar usuário.');
+                }
+            }
+        }
+
+        function limparFormulario() {
+            document.getElementById('id').value = '';
+            document.getElementById('nome').value = '';
+            document.getElementById('email').value = '';
+        }
+
+        // Carrega usuários ao abrir a página
+        listarUsuarios();
+    </script>
+</body>
+
+</html>
